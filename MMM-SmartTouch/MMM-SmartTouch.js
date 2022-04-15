@@ -4,6 +4,7 @@ Module.register("MMM-SmartTouch", {
     GoToButton: null,
     DeliveryButton: null,
     ConfirmButton: null,
+    Openpage: false,
   },
   
 
@@ -40,15 +41,12 @@ Module.register("MMM-SmartTouch", {
     }
   },
   
-  
-  
-  
   deselect: function () {
     GoToButton.innerHTML = "<span class='fa fa-circle fa-3x'></span>"
         + "<br>" + this.translate('Go to location'); 
     DeliveryButton.innerHTML = "<span class='fa fa-circle fa-3x'></span>"
         + "<br>" + this.translate('Delivery');
-    
+    Openpage = false;
     
   },
 
@@ -57,7 +55,10 @@ Module.register("MMM-SmartTouch", {
     standByButtonDiv.className = "st-container__standby-button";
 
     standByButtonDiv.appendChild(document.createElement("span"))
-    standByButtonDiv.addEventListener("click", () => this.toggleStandby());
+    standByButtonDiv.addEventListener("click", () => {
+      Openpage = true;
+      this.toggleStandby();
+    });
 
     return standByButtonDiv;
   },
@@ -74,29 +75,14 @@ Module.register("MMM-SmartTouch", {
     //const menuToggleButtonItem = document.createElement("li");
     const menuToggleButtonDiv = document.createElement("div");
     menuToggleButtonDiv.id = "st-menu-toggle";
-    /**
-    menuToggleButtonDiv.className = "st-container__menu-toggle";
-    menuToggleButtonDiv.id = "st-menu-toggle";
-
-    const hamburgerLineOne = document.createElement("div");
-    hamburgerLineOne.className = "st-container__menu-toggle st-toggle__bar_one";
-
-    const hamburgerLineTwo = document.createElement("div");
-    hamburgerLineTwo.className = "st-toggle__bar_two";
-
-    const hamburgerLineThree = document.createElement("div");
-    hamburgerLineThree.className = "st-toggle__bar_three";
-
-    menuToggleButtonDiv.appendChild(hamburgerLineOne);
-    menuToggleButtonDiv.appendChild(hamburgerLineTwo);
-    menuToggleButtonDiv.appendChild(hamburgerLineThree);
-    * */
+    
     menuToggleButtonDiv.innerHTML = "<span class='fa fa-archive fa-3x'></span>"
         + "<br>" + this.translate('');
     menuToggleButtonDiv.className = "st-container__menu-toggle";
 
     menuToggleButtonDiv.addEventListener("click", () => {
       this.sendSocketNotification("assert");
+      Openpage = true;
       this.toggleSideMenu();
       });
 
@@ -114,7 +100,6 @@ Module.register("MMM-SmartTouch", {
       this.deselect();
       this.toggleSideMenu();
     });
-      
 
     return closeButtonItem;
   },
@@ -125,9 +110,11 @@ Module.register("MMM-SmartTouch", {
     ConfirmButtonItem.innerHTML = "<span class='fa fa-circle fa-3x'></span>"
         + "<br>" + this.translate('Confirm');
     ConfirmButtonItem.className = "li-t";
-  
+    
     
     ConfirmButtonItem.addEventListener("click", () => {
+      
+        Openpage = true;
      
         ConfirmButtonItem.innerHTML = "<span class='fa fa-bullseye fa-3x'></span>"
         + "<br>" + this.translate('Go to location');
@@ -151,9 +138,8 @@ Module.register("MMM-SmartTouch", {
         + "<br>" + this.translate('Go to location');
         DeliveryButton.innerHTML = "<span class='fa fa-circle fa-3x'></span>"
         + "<br>" + this.translate('Delivery');
+        Openpage = true;
         this.sendSocketNotification("assert");
-        //setInterval(function(){ this.sendSocketNotification("deassert"); }, 10);
-        
        
     });
     
@@ -173,6 +159,7 @@ Module.register("MMM-SmartTouch", {
         + "<br>" + this.translate('Delivery');
         GoToButton.innerHTML = "<span class='fa fa-circle fa-3x'></span>"
         + "<br>" + this.translate('Go to location');
+        Openpage = true;
         this.sendSocketNotification("assert");
         //setInterval(function(){ this.sendSocketNotification("deassert"); }, 10);
         
@@ -184,26 +171,10 @@ Module.register("MMM-SmartTouch", {
   },
   
 
-/*
-  createRestartButton: function () {
-    const restartButtonItem = document.createElement("li");
-    restartButtonItem.innerHTML = "<span class='fa fa-repeat fa-3x'></span>"
-        + "<br>" + this.translate('RESTART');
-    restartButtonItem.className = "li-t"
-
-    // Send restart notification when clicked
-    restartButtonItem.addEventListener("click",
-        () => this.sendSocketNotification("RESTART", {}));
-
-    return restartButtonItem
-  },
-  * */
-
   createMainMenuDiv: function () {
     const mainMenuDiv = document.createElement("div");
     mainMenuDiv.className = "st-container__main-menu";
     mainMenuDiv.id = "st-main-menu";
-
     
     const closeButton = this.createCloseButton();
     GoToButton = this.createGoToButton();
@@ -242,10 +213,25 @@ Module.register("MMM-SmartTouch", {
   
 
   notificationReceived: function (notification, payload, sender) {
+     switch(notification) {
+        case "DOM_OBJECTS_CREATED":
+          var timer = setInterval(()=>{
+          this.sendSocketNotification("DO_YOUR_JOB");
+        }, 200)
+        break
+      }
   },
 
   // Recieve notification from sockets via nodehelper.js
-  socketNotificationReceived: function (notification, payload) {
+  socketNotificationReceived: function (notification) {
+    switch(notification) {
+      case "RETURN_NOW":
+        if(Openpage) {
+          this.toggleSideMenu();
+          Openpage = false;
+        }
+        break;
+    }
   },
 
 });
