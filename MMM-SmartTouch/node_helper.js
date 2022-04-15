@@ -5,7 +5,10 @@
  * https://smartbuilds.io
  * MIT Licensed.
  */
+ 
+var util = require("util");
 const NodeHelper = require("node_helper")
+
 
 module.exports = NodeHelper.create({
   start: function () {
@@ -37,7 +40,7 @@ module.exports = NodeHelper.create({
   **/
     if (notification === 'assert') {
       var fs = require('fs');
-      var count = 0;
+     
       fs.writeFile("/home/pi/Desktop/AuBi_State_Machine-main/input/interact_in.txt", "1", function (err) {
            if(err) {
              console.log("Error occured: write file failed")
@@ -55,21 +58,27 @@ module.exports = NodeHelper.create({
              console.log("Not Clicked!")
            }
           });
-        }, 200);
+        }, 2000);
           
     }
-    /**
-    if (notification === 'deassert') {
+    
+    if (notification === 'DO_YOUR_JOB') {
       var fs = require('fs');
-      fs.writeFile("/home/pi/Desktop/test.txt", "Not Clicked", function (err) {
-           if(err) {
-             console.log("Error occured: write file failed")
-           }else{
-             console.log("Not Cliecked!")
-           }
+     
+      fs.readFile("/home/pi/Desktop/AuBi_State_Machine-main/output/interact_end_out.txt", function (err, data) {
+           if(err) console.log("Error occured: read file failed")
+           return_home = data.toString().replace(/\s+/g, '');
+           console.log("Return home: " + return_home);
+           
         });
+        
+        if(return_home === '1') {
+          console.log("Return home screen");
+          this.sendSocketNotification("RETURN_NOW");
+        }
+      
     }
-    **/
+   
     
   },
 });
