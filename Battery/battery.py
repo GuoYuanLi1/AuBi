@@ -8,7 +8,7 @@ factor = 30 * 3600
 def read_percent(filename):
    with open(filename, "r") as f:
        for line in f:
-               return float(line)
+               return int(line)
             
 def write_percent(filename, percent):
     file = open(filename,"w")
@@ -36,7 +36,8 @@ def read_uart():
     
         
     
-prev_percent = 1 # make sure the percent.txt has 100 for initialization
+readP = read_percent(filename) # make sure the percent.txt has 1 for initialization
+prev_percent = readP / 100
 prev_voltage = 13
 
 while True:
