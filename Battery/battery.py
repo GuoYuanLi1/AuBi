@@ -9,14 +9,14 @@ def read_percent(filename):
    with open(filename, "r") as f:
        for line in f:
                return int(line)
-            
+
 def write_percent(filename, percent):
     file = open(filename,"w")
     file.write(percent) # percent is string
     file.close()
 
 def read_uart():
-    
+
     try:
         data = ser.readline().decode("utf-8").strip().split(", ")
     except:
@@ -32,27 +32,27 @@ def read_uart():
         else:
             data[idx] = int(data[idx]) / 100
     return data
-            
-    
-        
-    
-readP = read_percent(filename) # make sure the percent.txt has 1 for initialization
-prev_percent = readP / 100
+
+
+
+
+origin_percent = read_percent(filename) # make sure the percent.txt has 1 for initialization
+prev_percent = origin_percent / 100
 prev_voltage = 13
 
 while True:
-    
-    
+
+
     prev_amp_second = prev_percent * factor
     count = 0
     drain_current_sum = 0
     charge_current_sum = 0
     voltage_sum = 0
     start = time.time()
-    
-    
-    
-    while time.time()-start <=1:   
+
+
+
+    while time.time()-start <=1:
         # read drain_currnt from uart: drain_current_i = uart(read)
         # read charge_current from uart: charge_current_i = uart(read)
         # read voltage from uart: voltage = uart(read)
@@ -63,9 +63,9 @@ while True:
             charge_current_sum += (data[1] / 10.23 * 5 - 2.5) * 10
             count = count + 1
             time.sleep(0.05)
-        
+
     print("Number of data read: " + str(count))
-    
+
     # get average
     if(count != 0):
         voltage = voltage_sum / count
@@ -75,20 +75,20 @@ while True:
         voltage = prev_voltage
         drain_current = 0
         charge_current = 0
-            
-    
-    
+
+
+
     new_amp_second = prev_amp_second - drain_current + charge_current
-    
-    
+
+
     if voltage >= 14.5:
         new_percent = 1
     elif voltage <= 10:
         new_percent = 0
     else:
         new_percent = new_amp_second / factor
- 
-    
+
+
     write_percent(filename, str(int(new_percent*100)))
     print("Voltage: " + str(voltage))
     print("Drain current: " + str(drain_current))
@@ -96,6 +96,3 @@ while True:
     print("-------------------------------------------------------")
     prev_percent = new_percent
     voltage_prev = voltage
-    
-
-
