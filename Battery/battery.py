@@ -59,7 +59,7 @@ while True:
         data = read_uart()
         if(data != None):
             voltage_sum += data[2] / 10.23 * 20 - 0.3
-            drain_current_sum += (data[0] / 10.23 * 5 - 2.5) * 10
+            drain_current_sum += (data[0] / 10.23 * 5 - 2.5) * 1000 / 66
             charge_current_sum += (data[1] / 10.23 * 5 - 2.5) * 10
             count = count + 1
             time.sleep(0.05)
