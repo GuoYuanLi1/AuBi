@@ -1,24 +1,16 @@
-/* Magic Mirror
- * Warning.js
- *
- * By GuoYuan Li
- * Lafayette college
- * 
- */
-
-Module.register("Estop", {
+Module.register("Cargo", {
   defaults: {
-    estop: false,
-    resume: false,
+    Openpage: false,
   },
+  
 
   start: function () {
     Log.info(this.name + " has started...");
-    this.sendSocketNotification("ESTOP_CONFIG", this.config);
+    this.sendSocketNotification("CONFIG", this.config);
   },
 
   getStyles: function () {
-    return [this.file("css/estop.css"), "font-awesome.css"];
+    return [this.file("css/cargo.css"), "font-awesome.css"];
   },
 
   // Load translations files
@@ -29,216 +21,148 @@ Module.register("Estop", {
     };
   },
 
-  createEstopContainer: function () {
-    var Estopcontainer = document.createElement("div");
-    Estopcontainer.className = "st-estopcontainer";
+  createContainerDiv: function () {
+    const containerDiv = document.createElement("div");
+    containerDiv.className = "st-container";
 
-    return Estopcontainer;
+    return containerDiv;
   },
 
+  toggleStandby: function () {
+    const existingBodyClass = document.body.className;
+    if (existingBodyClass === "st-standby show") {
+      document.body.className = "st-standby fade";
+    } else {
+      document.body.className = "st-standby show";
+    }
+  },
+  
+  
+
+  createStandByButtonDiv: function () {
+    const standByButtonDiv = document.createElement("div");
+    standByButtonDiv.className = "st-container__standby-button";
+
+    standByButtonDiv.appendChild(document.createElement("span"))
+    standByButtonDiv.addEventListener("click", () => {
+      this.toggleStandby();
+    });
+
+    return standByButtonDiv;
+  },
 
   toggleSideMenu: function () {
-    var menuToggleDiv = document.getElementById("st-estopmenu-toggle")
+    const menuToggleDiv = document.getElementById("st-menu-toggle")
     menuToggleDiv.classList.toggle('show');
 
-    var mainMenuDiv = document.getElementById("st-estopmain-menu")
-    mainMenuDiv.classList.toggle('show');
+    const mainMenuDiv = document.getElementById("st-main-menu")
+    mainMenuDiv.classList.toggle('show')
   },
-
-
-  toggleResumeMenu: function () {
-    var menuToggleDiv = document.getElementById("st-resumemenu-toggle")
-    menuToggleDiv.classList.toggle('show');
-
-    var mainMenuDiv = document.getElementById("st-resumemain-menu")
-    mainMenuDiv.classList.toggle('show');
-  },
-
 
   createMenuToggleButtonDiv: function () {
-    var menuToggleButtonDiv = document.createElement("div");
-    menuToggleButtonDiv.className = "st-estopcontainer__estopmenu-toggle";
-    menuToggleButtonDiv.id = "st-estopmenu-toggle";
+    //const menuToggleButtonItem = document.createElement("li");
+    const menuToggleButtonDiv = document.createElement("div");
+    menuToggleButtonDiv.id = "st-menu-toggle";
+    
+    menuToggleButtonDiv.innerHTML = "<span class='fa fa-archive fa-3x'></span>"
+        + "<br>" + this.translate('');
+    menuToggleButtonDiv.className = "st-container__menu-toggle";
 
+    menuToggleButtonDiv.addEventListener("click", () => {
+      this.sendSocketNotification("assert");
+      Openpage = true;
+      this.toggleSideMenu();
+      });
+
+    //return menuToggleButtonItem;
     return menuToggleButtonDiv;
   },
 
-
-  createResumeToggleButtonDiv: function () {
-    var menuToggleButtonDiv = document.createElement("div");
-    menuToggleButtonDiv.className = "st-estopcontainer__resumemenu-toggle";
-    menuToggleButtonDiv.id = "st-resumemenu-toggle";
-
-    return menuToggleButtonDiv;
-  },
-
-
-  createResumeButton: function () {
-    var ResumeButtonItem = document.createElement("li");
-    
-    ResumeButtonItem.className = "li-t";
-    ResumeButtonItem.innerHTML = "<span class='fa fa-check fa-3x'></span>"
-        + "<br>" + this.translate('Resume');
-
-    
-    ResumeButtonItem.addEventListener("click", () => {
-
-      
-        this.toggleResumeMenu();
-
-     
+  createCloseButton: function () {
+    const closeButtonItem = document.createElement("li");
+    closeButtonItem.innerHTML = "<span class='fa fa-times-circle fa-3x'></span>"
+        + "<br>" + this.translate('CLOSE');
+    closeButtonItem.className = "li-t";
+    closeButtonItem.addEventListener("click", () => {
+      this.config.Openpage = false;
+      this.sendSocketNotification("assert");
+      this.toggleSideMenu();
     });
-    
-    return ResumeButtonItem;
-  },
 
+    return closeButtonItem;
+  },
   
 
-  createEstopWarningHeader: function () {
-    var header = document.createElement("li");
-    header.innerText = "ESTOP WARNING";
-    header.style.fontSize = "65pt";
-    header.style.lineHeight = "65pt";
 
-    return header;
+  createIFrame: function () {
+    iframe = document.createElement("IFRAME");
+    iframe.width = "99.5%";
+    iframe.height = "1000px"; // 630px for 13 inch
+    iframe.scrolling = "no";
+    iframe.src = "http://139.147.199.252:8081/"; 
+    
+    return iframe;
   },
-
-  createEstopWarningText: function () {
-    var text = document.createElement("li");
-    text.innerText = "ESTOP is pressed!\nFunctionality resumes when ESTOP is released!";
-    text.style.fontSize = "30pt";
-    text.style.lineHeight = "30pt";
-   
-
-    return text;
-
-  },
-
-
-  createResumeWarningHeader: function () {
-    var header = document.createElement("li");
-    header.innerText = "ESTOP WARNING";
-    header.style.fontSize = "65pt";
-    header.style.lineHeight = "65pt";
-
-    return header;
-  },
-
-  createResumeWarningText: function () {
-    var text = document.createElement("li");
-    text.innerText = "ESTOP is released!\nFunctionality resumes when RESUME button is pressed!";
-    text.style.fontSize = "30pt";
-    text.style.lineHeight = "30pt";
-   
-
-    return text;
-
-  },
-
-
+  
   
   createMainMenuDiv: function () {
-    var mainMenuDiv = document.createElement("div");
-    mainMenuDiv.className = "st-estopcontainer__estopmain-menu";
-    mainMenuDiv.id = "st-estopmain-menu";
-
-
-    var WarningHeader = this.createEstopWarningHeader();
-    var WarningText = this.createEstopWarningText();
-    //var ResumeButton = this.createResumeButton();
-
+    const mainMenuDiv = document.createElement("div");
+    mainMenuDiv.className = "st-container__main-menu";
+    mainMenuDiv.id = "st-main-menu";
+    
+    const closeButton = this.createCloseButton();
+    iFrame = this.createIFrame();
     
 
-    var buttonList = document.createElement("ul");
-
-    buttonList.appendChild(WarningHeader);
-    buttonList.appendChild(WarningText);
-    //buttonList.appendChild(ResumeButton);
+    const buttonList = document.createElement("ul");
+    buttonList.appendChild(closeButton);
+    buttonList.appendChild(iFrame);
     
-
-    mainMenuDiv.appendChild(buttonList);
-
-    return mainMenuDiv;
-  },
-
-
-  createResumeMenuDiv: function () {
-    var mainMenuDiv = document.createElement("div");
-    mainMenuDiv.className = "st-estopcontainer__resumemain-menu";
-    mainMenuDiv.id = "st-resumemain-menu";
-
-
-    var resumeHeader = this.createResumeWarningHeader();
-    var resumeText = this.createResumeWarningText();
-    var ResumeButton = this.createResumeButton();
-
     
-
-    var buttonList = document.createElement("ul");
-
-    buttonList.appendChild(resumeHeader);
-    buttonList.appendChild(resumeText);
-    buttonList.appendChild(ResumeButton);
-    
-
     mainMenuDiv.appendChild(buttonList);
 
     return mainMenuDiv;
   },
 
   getDom: function () {
+    // Initial standby state
+    document.body.className = "st-standby show";
     
-    var container = this.createEstopContainer();
-    
+    ///this.sendSocketNotification("deassert");
 
-    var menuToggleButton = this.createMenuToggleButtonDiv();
+    const container = this.createContainerDiv();
+
+    const standByButton = this.createStandByButtonDiv();
+    container.appendChild(standByButton);
+
+    const menuToggleButton = this.createMenuToggleButtonDiv();
     container.appendChild(menuToggleButton);
 
-    var resumeToggleButton = this.createResumeToggleButtonDiv();
-    container.appendChild(resumeToggleButton);
-    
-
-    var mainMenu = this.createMainMenuDiv();
+    const mainMenu = this.createMainMenuDiv();
     document.body.appendChild(mainMenu);
-
-    var resumeMenu = this.createResumeMenuDiv();
-    document.body.appendChild(resumeMenu);
+    
 
     return container;
   },
+  
 
   notificationReceived: function (notification, payload, sender) {
      switch(notification) {
         case "DOM_OBJECTS_CREATED":
           var timer = setInterval(()=>{
-          this.sendSocketNotification("READ_ESTOP");
-        }, 200);
+          this.sendSocketNotification("DO_YOUR_JOB");
+        }, 200)
         break
       }
   },
 
-
+  // Recieve notification from sockets via nodehelper.js
   socketNotificationReceived: function (notification) {
     switch(notification) {
-      case "ESTOP":
-        if(!this.config.estop) {
-          this.config.estop = true;
-          if(this.config.resume) {
-            this.toggleResumeMenu();
-            this.config.resume = false;
-          }
-
+      case "RETURN_NOW":
+        if(Openpage) {
           this.toggleSideMenu();
-        }
-        break;
-
-      case "NOT_ESTOP":
-        if(this.config.estop) {
-          this.config.resume = true;
-          this.config.estop = false;
-          this.toggleSideMenu();
-          this.toggleResumeMenu();
-          //this.config.resume = false;
+          Openpage = false;
         }
         break;
     }
