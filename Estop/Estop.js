@@ -9,7 +9,7 @@
 Module.register("Estop", {
   defaults: {
     estop: false,
-    change: false,
+    resume: false,
   },
 
   start: function () {
@@ -45,7 +45,15 @@ Module.register("Estop", {
     mainMenuDiv.classList.toggle('show');
   },
 
-  
+
+  toggleResumeMenu: function () {
+    var menuToggleDiv = document.getElementById("st-resumemenu-toggle")
+    menuToggleDiv.classList.toggle('show');
+
+    var mainMenuDiv = document.getElementById("st-resumemain-menu")
+    mainMenuDiv.classList.toggle('show');
+  },
+
 
   createMenuToggleButtonDiv: function () {
     var menuToggleButtonDiv = document.createElement("div");
@@ -56,17 +64,27 @@ Module.register("Estop", {
   },
 
 
+  createResumeToggleButtonDiv: function () {
+    var menuToggleButtonDiv = document.createElement("div");
+    menuToggleButtonDiv.className = "st-estopcontainer__resumemenu-toggle";
+    menuToggleButtonDiv.id = "st-resumemenu-toggle";
+
+    return menuToggleButtonDiv;
+  },
+
+
   createResumeButton: function () {
     var ResumeButtonItem = document.createElement("li");
     
     ResumeButtonItem.className = "li-t";
-    if(this.config.change) ResumeButtonItem.innerHTML = "<span class='fa fa-circle fa-3x'></span>"
-        + "<br>" + this.translate('Resume');;
+    ResumeButtonItem.innerHTML = "<span class='fa fa-check fa-3x'></span>"
+        + "<br>" + this.translate('Resume');
 
     
     ResumeButtonItem.addEventListener("click", () => {
+
       
-        if(!this.config.estop) this.toggleSideMenu();
+        this.toggleResumeMenu();
 
      
     });
@@ -97,6 +115,27 @@ Module.register("Estop", {
   },
 
 
+  createResumeWarningHeader: function () {
+    var header = document.createElement("li");
+    header.innerText = "ESTOP WARNING";
+    header.style.fontSize = "65pt";
+    header.style.lineHeight = "65pt";
+
+    return header;
+  },
+
+  createResumeWarningText: function () {
+    var text = document.createElement("li");
+    text.innerText = "ESTOP is released!\nFunctionality resumes when RESUME button is pressed!";
+    text.style.fontSize = "30pt";
+    text.style.lineHeight = "30pt";
+   
+
+    return text;
+
+  },
+
+
   
   createMainMenuDiv: function () {
     var mainMenuDiv = document.createElement("div");
@@ -106,7 +145,7 @@ Module.register("Estop", {
 
     var WarningHeader = this.createEstopWarningHeader();
     var WarningText = this.createEstopWarningText();
-    var ResumeButton = this.createResumeButton();
+    //var ResumeButton = this.createResumeButton();
 
     
 
@@ -114,6 +153,31 @@ Module.register("Estop", {
 
     buttonList.appendChild(WarningHeader);
     buttonList.appendChild(WarningText);
+    //buttonList.appendChild(ResumeButton);
+    
+
+    mainMenuDiv.appendChild(buttonList);
+
+    return mainMenuDiv;
+  },
+
+
+  createResumeMenuDiv: function () {
+    var mainMenuDiv = document.createElement("div");
+    mainMenuDiv.className = "st-estopcontainer__resumemain-menu";
+    mainMenuDiv.id = "st-resumemain-menu";
+
+
+    var resumeHeader = this.createResumeWarningHeader();
+    var resumeText = this.createResumeWarningText();
+    var ResumeButton = this.createResumeButton();
+
+    
+
+    var buttonList = document.createElement("ul");
+
+    buttonList.appendChild(resumeHeader);
+    buttonList.appendChild(resumeText);
     buttonList.appendChild(ResumeButton);
     
 
@@ -124,57 +188,23 @@ Module.register("Estop", {
 
   getDom: function () {
     
-    //var container = this.createEstopContainer();
-    var Estopcontainer = document.createElement("div");
-    Estopcontainer.className = "st-estopcontainer";
-
-    //var menuToggleButton = this.createMenuToggleButtonDiv();
-    var menuToggleButtonDiv = document.createElement("div");
-    menuToggleButtonDiv.className = "st-estopcontainer__estopmenu-toggle";
-    menuToggleButtonDiv.id = "st-estopmenu-toggle";
-    Estopcontainer.appendChild(menuToggleButtonDiv);
+    var container = this.createEstopContainer();
     
 
-    //var mainMenu = this.createMainMenuDiv();
-    var mainMenuDiv = document.createElement("div");
-    mainMenuDiv.className = "st-estopcontainer__estopmain-menu";
-    mainMenuDiv.id = "st-estopmain-menu";
+    var menuToggleButton = this.createMenuToggleButtonDiv();
+    container.appendChild(menuToggleButton);
 
-    var buttonList = document.createElement("ul");
+    var resumeToggleButton = this.createResumeToggleButtonDiv();
+    container.appendChild(resumeToggleButton);
+    
 
-    var header = document.createElement("li");
-    header.innerText = "ESTOP WARNING";
-    header.style.fontSize = "65pt";
-    header.style.lineHeight = "65pt";
+    var mainMenu = this.createMainMenuDiv();
+    document.body.appendChild(mainMenu);
 
-    buttonList.appendChild(header);
+    var resumeMenu = this.createResumeMenuDiv();
+    document.body.appendChild(resumeMenu);
 
-    var text = document.createElement("li");
-    text.innerText = "ESTOP is pressed!\nFunctionality resumes when ESTOP is released!";
-    text.style.fontSize = "30pt";
-    text.style.lineHeight = "30pt";
-
-    buttonList.appendChild(text);
-
-
-    var ResumeButtonItem = document.createElement("li");
-    ResumeButtonItem.className = "li-t";
-     ResumeButtonItem.innerHTML = "<span class='fa fa-check fa-3x'></span>"
-        + "<br>" + this.translate('Press here after releasing ESTOP');;
-    ResumeButtonItem.addEventListener("click", () => {
-      
-        if(!this.config.estop) this.toggleSideMenu();
-
-    });
-
-    buttonList.appendChild(ResumeButtonItem);
-
-    mainMenuDiv.appendChild(buttonList);
-
-    document.body.appendChild(mainMenuDiv);
-    // Estopcontainer.appendChild(mainMenuDiv);
-
-    return Estopcontainer;
+    return container;
   },
 
   notificationReceived: function (notification, payload, sender) {
@@ -193,16 +223,22 @@ Module.register("Estop", {
       case "ESTOP":
         if(!this.config.estop) {
           this.config.estop = true;
+          if(this.config.resume) {
+            this.toggleResumeMenu();
+            this.config.resume = false;
+          }
+
           this.toggleSideMenu();
         }
         break;
 
       case "NOT_ESTOP":
         if(this.config.estop) {
+          this.config.resume = true;
           this.config.estop = false;
-          this.config.change = true;
-          this.updateDom();
-          //this.config.change = false;
+          this.toggleSideMenu();
+          this.toggleResumeMenu();
+          //this.config.resume = false;
         }
         break;
     }
