@@ -86,7 +86,7 @@ let config = {
 				type: "forecast",
 				location: "Easton",
 				locationID: "5188140", //ID from http://bulk.openweathermap.org/sample/city.list.json.gz; unzip the gz file and find your city
-				apiKey: "28ac4733b7fbdba1e2b1a6b653e4d5e5"
+				apiKey: "28ac4733b7fbdba1e2b1a6b653e4d5e5" // YOUR_OPENWEATHER_API_KEY
 			}
 		},
 		{
@@ -105,18 +105,37 @@ let config = {
 				broadcastNewsUpdates: true
 			}
 		},
+
 		{
-			module: "MMM-Face-Recognition-SMAI",
-			position: "top_right",
+			module: 'Cargo',
+			position: 'bottom_center',
 			config: {
-				//promp
+
 			}
 		},
+		
+
 		{
-			module: 'MMM-SmartTouch', 
-			position: 'bottom_center',    // This can be any of the regions.(bottom-center Recommended)
-			config:{ 
-					// None configuration options defined 
+  			module: 'Battery',
+  			position: 'top_center',	// This can be any of the regions.
+  			config: {
+  			  	
+  			}
+		},
+
+		{
+			module: 'Tipping',
+			position: 'bottom_center',
+			config: {
+
+			}
+		},
+
+		{
+			module: 'Estop',
+			position: 'bottom_center',
+			config: {
+
 			}
 		},
 	]
