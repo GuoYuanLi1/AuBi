@@ -14,7 +14,9 @@ module.exports = NodeHelper.create({
     this.started = false;
     this.config = {};
     this.urlUpdated = false;
+    this.inputCargo = false;
     this.readFinger = false;
+    this.receiveCargo = false;
   },
 
   socketNotificationReceived: function (notification, payload) {
@@ -40,7 +42,7 @@ module.exports = NodeHelper.create({
     }
     
 
-    if (notification === 'assert') {
+    else if (notification === 'assert') {
       var fs = require('fs');
      
       fs.writeFile("/home/pi/Desktop/MagicMirror/modules/Cargo/interact_in.txt", "1", function (err) {
@@ -60,37 +62,17 @@ module.exports = NodeHelper.create({
              console.log("Not Clicked!")
            }
           });
-        }, 2000);
+        }, 100);
           
     }
     
     
-     if (notification === 'CARGO_START') {
+     else if (notification === 'CARGO_START') {
         var fs = require('fs');
-      // var return_home = '';
-     
-        fs.readFile("/home/pi/Desktop/MagicMirror/modules/Cargo/interact_end_out.txt", function (err, data) {
-           if(err) console.log("Error occured: read file failed")
-           return_home = data.toString().replace(/\s+/g, '');
-           // console.log("Return home: " + return_home);
-           
-        });
-    
-        fs.readFile("/home/pi/Desktop/MagicMirror/modules/Cargo/name.txt", function (err, data) {
-              if(err) console.log("Error occured: read file failed")
-              name_web = data.toString().replace(/\s+/g, '');
-              //console.log("Confirm: " + confirm);
-            });
-            
-        fs.readFile("/home/pi/Desktop/MagicMirror/modules/Cargo/fingerprint.txt", function (err, data) {
-              if(err) console.log("Error occured: read file failed")
-              name_finger = data.toString().replace(/\s+/g, '');
-              //console.log("Confirm: " + confirm);
-            });
-            
-            
-         if(!this.urlUpdated) {
-          console.log("URL NOT UPDATED!!!!");
+        
+        // Update URL
+        if(!this.urlUpdated) {
+          // console.log("URL NOT UPDATED!!!!");
           fs.readFile("/home/pi/Desktop/MagicMirror/modules/Cargo/url.txt", function (err, data) {
            if(err) console.log("Error occured: read file failed")
            else {
@@ -111,60 +93,111 @@ module.exports = NodeHelper.create({
                 }
               });
 
-
-
+            }
+        }
+      
+      
+        // User presses Retrieval button and enters retrieval page
+        if (this.getFinger) {
+            fs.readFile("/home/pi/Desktop/MagicMirror/modules/Cargo/name.txt", function (err, data) {
+                  if(err) console.log("Error occured: read file failed")
+                  name_web = data.toString().replace(/\s+/g, '');
+                  //console.log("Confirm: " + confirm);
+                });
+            
+            fs.readFile("/home/pi/Desktop/MagicMirror/modules/Cargo/fingerprint.txt", function (err, data) {
+                  if(err) console.log("Error occured: read file failed")
+                  name_finger = data.toString().replace(/\s+/g, '');
+                  //console.log("Confirm: " + confirm);
+                });
+        
+            if(name_web === name_finger) {
+                  // Open lock
+                  fs.writeFile("/home/pi/Desktop/MagicMirror/modules/Cargo/lock.txt", "1", function (err) {
+                    if(err) {
+                      console.log("Error occured: write file failed")
+                    }else{
+                      
+                      console.log("Fingerprint matched! Open lock!")
+                    }
+                  });
+                  this.getFinger = false;
+            }
+            
+        // User presses Cargo button and enters Cargo page
+        if (this.inputCargo) {
+            fs.readFile("/home/pi/Desktop/MagicMirror/modules/Cargo/delivery.txt", function (err, data) {
+                  if(err) console.log("Error occured: read file failed")
+                  delivery = data.toString().replace(/\s+/g, '').charAt(0);
+                  // console.log("Return home: " + return_home);
+                });
+        
+            fs.readFile("/home/pi/Desktop/MagicMirror/modules/Cargo/confirm.txt", function (err, data) {
+                  if(err) console.log("Error occured: read file failed")
+                  confirm = data.toString().replace(/\s+/g, '');
+                  //console.log("Confirm: " + confirm);
+                });
+        
+        
+            if(confirm === '1' && delivery === '1') {
+                  // Open lock
+                fs.writeFile("/home/pi/Desktop/MagicMirror/modules/Cargo/lock.txt", "1", function (err) {
+                    if(err) {
+                      console.log("Error occured: write file failed")
+                    }else{
+                      console.log("Cargo delivery registered! Open lock!");
+                    
+                    }
+                });
+              // this.sendSocketNotification("LOCK_OPEN");
+              this.inputCargo = false;
             }
         }
             
-         if(name_web === name_finger) {
-              // Open lock
-              fs.writeFile("/home/pi/Desktop/MagicMirror/modules/Cargo/lock.txt", "1", function (err) {
-                if(err) {
-                  console.log("Error occured: write file failed")
-                }else{
-                  console.log("Name matched! Open lock!")
-                }
-              });
-            }
+            
+      }
+     
         
+         fs.readFile("/home/pi/Desktop/MagicMirror/modules/Cargo/interact_end_out.txt", function (err, data) {
+           if(err) console.log("Error occured: read file failed")
+           return_home = data.toString().replace(/\s+/g, '');
+           // console.log("Return home: " + return_home);
+           
+        });
+         
         
         
         if(return_home === '1') {
           // console.log("Return home screen");
           this.sendSocketNotification("RETURN_NOW");
         }
-        if(payload === 0) {
-            fs.readFile("/home/pi/Desktop/MagicMirror/modules/Cargo/delivery.txt", function (err, data) {
-              if(err) console.log("Error occured: read file failed")
-              delivery = data.toString().replace(/\s+/g, '').charAt(0);
-              // console.log("Return home: " + return_home);
-            });
-        
-            fs.readFile("/home/pi/Desktop/MagicMirror/modules/Cargo/confirm.txt", function (err, data) {
-              if(err) console.log("Error occured: read file failed")
-              confirm = data.toString().replace(/\s+/g, '');
-              //console.log("Confirm: " + confirm);
-            });
         
         
-            if(confirm === '1' && delivery === '1') {
-              // Open lock
-              fs.writeFile("/home/pi/Desktop/MagicMirror/modules/Cargo/lock.txt", "1", function (err) {
-              if(err) {
-                console.log("Error occured: write file failed")
-              }else{
-                console.log("Open lock!")
-              }
-              });
-              // this.sendSocketNotification("LOCK_OPEN");
-            }
-        }else if(payload === 1) {
-            // Deassert confirm
+        
+        
+    }
+    
+    else if (notification === "GET_CARGO") {
+      this.getFinger = true;
+    }
+    
+    else if (notification === "INPUT_TASK") {
+      this.inputCargo = true;
+    }
+    
+    
+    else if (notification === "CLOSE_LOCK") {
+       var fs = require('fs');
+      
+      // User presses 'CONFIRM' and leave Cargo Delivery page
+      if (payload) {
+         // Deassert confirm
             fs.writeFile("/home/pi/Desktop/MagicMirror/modules/Cargo/confirm.txt", "0", function (err) {
               if(err) {
                 console.log("Error occured: write file failed")
               }else{
-                console.log("Deassert confirm")
+                console.log("User leaves Cargo page! Deassert confirm")
+                confirm = '0';
               }
             });
         
@@ -173,13 +206,13 @@ module.exports = NodeHelper.create({
               if(err) {
                 console.log("Error occured: write file failed")
               }else{
-                console.log("Close Lock!")
-                confirm = '0';
+                console.log("User leaves Cargo page! Close Lock!")
                 //console.log("Confirm: " + confirm);
               }
             });
-          }else if(payload === 2) {
-             // Close Lock
+      // User presses 'RECEIVED' and leave Retrieval page 
+      }else{
+            // Close Lock
               fs.writeFile("/home/pi/Desktop/MagicMirror/modules/Cargo/lock.txt", "0", function (err) {
                   if(err) {
                     console.log("Error occured: write file failed")
@@ -190,7 +223,8 @@ module.exports = NodeHelper.create({
                     //console.log("Confirm: " + confirm);
                   }
                 });
-                
+            
+            // Erase name on web
             fs.writeFile("/home/pi/Desktop/MagicMirror/modules/Cargo/name.txt", "xxx", function (err) {
               if(err) {
                 console.log("Error occured: write file failed")
@@ -200,7 +234,7 @@ module.exports = NodeHelper.create({
               }
             });
         
-            // Close Lock
+            // Erase fingerprint
             fs.writeFile("/home/pi/Desktop/MagicMirror/modules/Cargo/fingerprint.txt", "yyy", function (err) {
               if(err) {
                 console.log("Error occured: write file failed")
@@ -210,9 +244,9 @@ module.exports = NodeHelper.create({
                 //console.log("Confirm: " + confirm);
               }
             });
-          
-          }
         
+        
+      }
     }
     
     

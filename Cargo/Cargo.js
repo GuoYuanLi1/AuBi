@@ -50,8 +50,9 @@ Module.register("Cargo", {
         + "<br>" + this.translate('');
     receiveButtonDiv.addEventListener("click", () => {
       this.toggleReceiveMenu();
-      //this.sendSocketNotification("CARGO_START",2);
+      this.sendSocketNotification("GET_CARGO");
       this.sendSocketNotification("assert");
+      
     });
 
     return receiveButtonDiv;
@@ -64,8 +65,8 @@ Module.register("Cargo", {
     getButtonItem.className = "li-t";
     getButtonItem.addEventListener("click", () => {
       this.config.Openpage = false;
+      this.sendSocketNotification("CLOSE_LOCK", false);
       this.sendSocketNotification("assert");
-      this.sendSocketNotification("CARGO_START",2);
       
       this.toggleReceiveMenu();
     });
@@ -111,9 +112,10 @@ Module.register("Cargo", {
     menuToggleButtonDiv.className = "st-container__menu-toggle";
 
     menuToggleButtonDiv.addEventListener("click", () => {
-      this.sendSocketNotification("assert");
       Openpage = true;
       this.toggleSideMenu();
+      this.sendSocketNotification("INPUT_TASK");
+      this.sendSocketNotification("assert");
       });
 
     //return menuToggleButtonItem;
@@ -130,7 +132,7 @@ Module.register("Cargo", {
     confrimButtonItem.addEventListener("click", () => {
       this.config.Openpage = false;
       this.sendSocketNotification("assert");
-      this.sendSocketNotification("CARGO_START",1);
+      this.sendSocketNotification("CLOSE_LOCK", true);
       
       this.toggleSideMenu();
     });
