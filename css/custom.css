@@ -1,0 +1,46 @@
+/* Module size Section*/
+.clock {
+  transform: scale(1.5);
+  transform-origin: top left;
+  height: 150px;
+}
+
+.calendar {
+  transform: scale(1.5);
+  transform-origin: top left;
+}
+
+.newsfeed {
+  transform: scale(1.5);
+  height: 80px;
+}
+
+.weather {
+  transform: scale(1.5);
+  transform-origin: top right;
+  margin-bottom: 100px;
+}
+
+
+
+/* weather icon color section */
+.wi-sunrise {
+	color: #ffff00; /* yellow */
+}
+
+.wi-night-rain {
+	color: purple;
+}
+
+.wi-cloudy-windy {
+	color:darkcyan;
+}
+
+.wi-rain {
+	color: dodgerblue;
+}
+
+.wi-strong-wind {
+	color: mediumblue;
+}
+
