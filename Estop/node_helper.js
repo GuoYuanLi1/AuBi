@@ -11,6 +11,7 @@ module.exports = NodeHelper.create({
   start: function () {
     this.started = false;
     this.config = {};
+    this.estop_file = "/home/pi/Desktop/MagicMirror/modules/Estop/estop.txt";
   },
 
   socketNotificationReceived: function (notification, payload) {
@@ -19,26 +20,23 @@ module.exports = NodeHelper.create({
         this.config = payload;
         this.started = true;
         console.log("Estop module has started")
-        //this.sendSocketNotification("SHUTIT", payload);
+        
+        var fs = require('fs');
+        // Clear estop
+        fs.writeFileSync(this.estop_file, "0");
+        console.log("Clear Estop");
       }
     }
 
     else if (notification === "READ_ESTOP") {
       var fs = require('fs');
-      
-     
-      fs.readFile("/home/pi/Desktop/MagicMirror/modules/Estop/estop.txt", function (err, data) {
-          if(err) console.log("Error occured: read file failed");
-
-          estop = data.toString().replace(/\s+/g, '');
-          //console.log("tipping!");
-      });
-
+      var estop = fs.readFileSync(this.estop_file).toString().replace(/\s+/g, '');
+    
       //console.log("outside read data: " + data_read);
       if(estop === '1') {
         // console.log("sending percent: " + percent);
         this.sendSocketNotification("ESTOP");
-      }else if(estop === '0') {
+      }else{
         this.sendSocketNotification("NOT_ESTOP");
       }
          
