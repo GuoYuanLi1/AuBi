@@ -13,6 +13,7 @@ module.exports = NodeHelper.create({
 
   start: function() {
     this.started = false;
+    this.percent_file = "/home/pi/Desktop/MagicMirror/modules/Battery/percent.txt";
   },
 
   
@@ -27,17 +28,18 @@ module.exports = NodeHelper.create({
     
     else if (notification === "GET_DATA") {
       var fs = require('fs');
-      
-     
+      var percent = fs.readFileSync(this.percent_file).toString().replace(/\s+/g, '');
+      /*
       fs.readFile("/home/pi/Desktop/MagicMirror/modules/Battery/percent.txt", function (err, data) {
           if(err) console.log("Error occured: read file failed");
 
           percent = data.toString().replace(/\s+/g, '');
           
       });
+      * */
 
-      //console.log("outside read data: " + data_read);
-      if(percent > 0) {
+      
+      if(percent !== "") {
         // console.log("sending percent: " + percent);
         this.sendSocketNotification("DATA_READ", percent);
       }

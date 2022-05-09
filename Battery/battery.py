@@ -2,13 +2,13 @@ import serial
 import time
 
 ser = serial.Serial("/dev/ttyUSB0", 9600, timeout=5)
-filename = "/home/pi/Desktop/percent.txt"
+filename = "/home/pi/Desktop/MagicMirror/modules/Battery/percent.txt"
 factor = 30 * 3600
 
 def read_percent(filename):
    with open(filename, "r") as f:
        for line in f:
-               return int(line)
+               return float(line)
 
 def write_percent(filename, percent):
     file = open(filename,"w")
@@ -58,8 +58,8 @@ while True:
         # read voltage from uart: voltage = uart(read)
         data = read_uart()
         if(data != None):
-            voltage_sum += data[2] / 10.23 * 20 - 0.3
-            drain_current_sum += (data[0] / 10.23 * 5 - 2.5) * 1000 / 66
+            voltage_sum += data[2] / 10.23 * 20 + 0.1
+            drain_current_sum += (data[0] / 10.23 * 5 - 2.5) * 1000 / 66 * (-1)
             charge_current_sum += (data[1] / 10.23 * 5 - 2.5) * 10
             count = count + 1
             time.sleep(0.05)
@@ -89,10 +89,11 @@ while True:
         new_percent = new_amp_second / factor
 
 
-    write_percent(filename, str(int(new_percent*100)))
+    write_percent(filename, str(new_percent*100))
     print("Voltage: " + str(voltage))
     print("Drain current: " + str(drain_current))
     print("Charge current: " + str(charge_current))
+    print("battery percent: "+ str(new_percent*100))
     print("-------------------------------------------------------")
     prev_percent = new_percent
     voltage_prev = voltage
