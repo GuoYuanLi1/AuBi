@@ -105,7 +105,7 @@ let config = {
 				broadcastNewsUpdates: true
 			}
 		},
-		/*
+		
 		{
 			module: 'Facial',
 			position: 'bottom_right',
@@ -114,7 +114,7 @@ let config = {
 			}
 			
 		},
-		* */
+	
 
 		{
 			module: 'Cargo',
