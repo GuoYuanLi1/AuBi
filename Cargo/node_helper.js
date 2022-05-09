@@ -17,6 +17,14 @@ module.exports = NodeHelper.create({
     this.inputCargo = false;
     this.readFinger = false;
     this.receiveCargo = false;
+    this.lock_file = "/home/pi/Desktop/MagicMirror/modules/Cargo/lock.txt";
+    this.interact_file = "/home/pi/Desktop/MagicMirror/modules/Cargo/interact_in.txt";
+    this.interact_end_file = "/home/pi/Desktop/MagicMirror/modules/Cargo/interact_end_out.txt";
+    this.url_file = "/home/pi/Desktop/MagicMirror/modules/Cargo/url.txt";
+    this.delivery_file = "/home/pi/Desktop/MagicMirror/modules/Cargo/delivery.txt";
+    this.confirm_file = "/home/pi/Desktop/MagicMirror/modules/Cargo/confirm.txt";
+    this.name_file = "/home/pi/Desktop/MagicMirror/modules/Cargo/name.txt";
+    this.finger_file = "/home/pi/Desktop/MagicMirror/modules/Cargo/fingerprint.txt";
   },
 
   socketNotificationReceived: function (notification, payload) {
@@ -24,45 +32,50 @@ module.exports = NodeHelper.create({
       if (!this.started) {
         this.config = payload;
         this.started = true;
-        console.log("cargo module has started")
-        //console.log("proceed")
-        //this.sendSocketNotification("SHUTIT", payload);
+        console.log("cargo module has started");
         
         var fs = require('fs');
-         fs.writeFile("/home/pi/Desktop/MagicMirror/modules/Cargo/lock.txt", "0", function (err) {
-              if(err) {
-                console.log("Error occured: write file failed")
-              }else{
-                console.log("Close the acidentally opened lock!")
-              }
-            });
+        // Close the unclosed lock
+        fs.writeFileSync(this.lock_file, "0");
+        console.log("Close the initially opened lock!");
         
+        // Clear interact end
+        fs.writeFileSync(this.interact_end_file, "0");
+        console.log("Clear interact end");
+        
+        // Clear Confirm
+        fs.writeFileSync(this.confirm_file, "0");
+        console.log("Clear interact end");
+        
+        // Clear name
+        fs.writeFileSync(this.name_file, "xxx");
+        console.log("Clear name from website");
+        
+        // Clear fingerprint
+        fs.writeFileSync(this.finger_file, "yyy");
+        console.log("Clear fingerprint");
       }
       
     }
     
 
     else if (notification === 'assert') {
-      var fs = require('fs');
-     
-      fs.writeFile("/home/pi/Desktop/MagicMirror/modules/Cargo/interact_in.txt", "1", function (err) {
-           if(err) {
-             console.log("Error occured: write file failed")
-           }else{
-             console.log("Clicked!")
-           }
-        });
+        var fs = require('fs');
+        // Assert the interact
+        fs.writeFileSync(this.interact_file, "1");
+        console.log("Clicked!");
+      
         
         //delay x millisecond and then deassert click signal
         setTimeout(function(){ 
-          fs.writeFile("/home/pi/Desktop/MagicMirror/modules/Cargo/interact_in.txt", "0", function (err) {
+          fs.writeFile(this.interact_file, "0", function (err) {
            if(err) {
              console.log("Error occured: write file failed")
            }else{
              console.log("Not Clicked!")
            }
           });
-        }, 100);
+        }, 1000 * 120);
           
     }
     
@@ -72,26 +85,14 @@ module.exports = NodeHelper.create({
         
         // Update URL
         if(!this.urlUpdated) {
-          // console.log("URL NOT UPDATED!!!!");
-          fs.readFile("/home/pi/Desktop/MagicMirror/modules/Cargo/url.txt", function (err, data) {
-           if(err) console.log("Error occured: read file failed")
-           else {
-            url = data.toString().replace(/\s+/g, '')
-            //console.log("URL get: " + url);
-            } 
-          });
-
+            var url = fs.readFileSync(this.url_file).toString().replace(/\s+/g, '');
+          
             if(url !== "") {
               this.urlUpdated = true;
-              this.sendSocketNotification("URL_UP", url);
+              this.sendSocketNotification("URL_UP", "http://" + url + ":8081/"); // "http://" + url + ":8081/"
               console.log("URL updated!!!!");
-              fs.writeFile("/home/pi/Desktop/MagicMirror/modules/Cargo/url.txt", "", function (err) {
-                if(err) {
-                  console.log("Error occured: write file failed")
-                }else{
-                  console.log("URL text removed!!!")
-                }
-              });
+              fs.writeFileSync(this.url_file, "");
+              console.log("URL text removed!!!");
 
             }
         }
@@ -99,158 +100,85 @@ module.exports = NodeHelper.create({
       
         // User presses Retrieval button and enters retrieval page
         if (this.getFinger) {
-            fs.readFile("/home/pi/Desktop/MagicMirror/modules/Cargo/name.txt", function (err, data) {
-                  if(err) console.log("Error occured: read file failed")
-                  name_web = data.toString().replace(/\s+/g, '');
-                  //console.log("Confirm: " + confirm);
-                });
-            
-            fs.readFile("/home/pi/Desktop/MagicMirror/modules/Cargo/fingerprint.txt", function (err, data) {
-                  if(err) console.log("Error occured: read file failed")
-                  name_finger = data.toString().replace(/\s+/g, '');
-                  //console.log("Confirm: " + confirm);
-                });
-        
+            var name_web = fs.readFileSync(this.name_file).toString().replace(/\s+/g, '');
+      
+            var name_finger = fs.readFileSync(this.finger_file).toString().replace(/\s+/g, '');
+  
             if(name_web === name_finger) {
                   // Open lock
-                  fs.writeFile("/home/pi/Desktop/MagicMirror/modules/Cargo/lock.txt", "1", function (err) {
-                    if(err) {
-                      console.log("Error occured: write file failed")
-                    }else{
-                      
-                      console.log("Fingerprint matched! Open lock!")
-                    }
-                  });
+                  fs.writeFileSync(this.lock_file, "1");
+                  console.log("Fingerprint matched! Open lock!");
                   this.getFinger = false;
             }
+          }
             
         // User presses Cargo button and enters Cargo page
         if (this.inputCargo) {
-            fs.readFile("/home/pi/Desktop/MagicMirror/modules/Cargo/delivery.txt", function (err, data) {
-                  if(err) console.log("Error occured: read file failed")
-                  delivery = data.toString().replace(/\s+/g, '').charAt(0);
-                  // console.log("Return home: " + return_home);
-                });
-        
-            fs.readFile("/home/pi/Desktop/MagicMirror/modules/Cargo/confirm.txt", function (err, data) {
-                  if(err) console.log("Error occured: read file failed")
-                  confirm = data.toString().replace(/\s+/g, '');
-                  //console.log("Confirm: " + confirm);
-                });
-        
-        
+            var delivery = fs.readFileSync(this.delivery_file).toString().replace(/\s+/g, '').charAt(0);
+           
+            var confirm = fs.readFileSync(this.confirm_file).toString().replace(/\s+/g, '');
+            
             if(confirm === '1' && delivery === '1') {
-                  // Open lock
-                fs.writeFile("/home/pi/Desktop/MagicMirror/modules/Cargo/lock.txt", "1", function (err) {
-                    if(err) {
-                      console.log("Error occured: write file failed")
-                    }else{
-                      console.log("Cargo delivery registered! Open lock!");
-                    
-                    }
-                });
-              // this.sendSocketNotification("LOCK_OPEN");
+              // Open lock
+              fs.writeFileSync(this.lock_file, "1");
+              console.log("Cargo delivery registered! Open lock!");
               this.inputCargo = false;
             }
         }
             
-            
-      }
-     
-        
-         fs.readFile("/home/pi/Desktop/MagicMirror/modules/Cargo/interact_end_out.txt", function (err, data) {
-           if(err) console.log("Error occured: read file failed")
-           return_home = data.toString().replace(/\s+/g, '');
-           // console.log("Return home: " + return_home);
-           
-        });
-         
-        
+          
+        // Check if need to return home screen
+        var return_home = fs.readFileSync(this.interact_end_file).toString().replace(/\s+/g, '');
         
         if(return_home === '1') {
-          // console.log("Return home screen");
+          console.log("Return home screen");
           this.sendSocketNotification("RETURN_NOW");
         }
-        
-        
         
         
     }
     
     else if (notification === "GET_CARGO") {
+      console.log("Fetching Cargo");
       this.getFinger = true;
     }
     
     else if (notification === "INPUT_TASK") {
+      console.log("Inputting Task");
       this.inputCargo = true;
     }
     
     
     else if (notification === "CLOSE_LOCK") {
-       var fs = require('fs');
+        var fs = require('fs');
       
-      // User presses 'CONFIRM' and leave Cargo Delivery page
-      if (payload) {
-         // Deassert confirm
-            fs.writeFile("/home/pi/Desktop/MagicMirror/modules/Cargo/confirm.txt", "0", function (err) {
-              if(err) {
-                console.log("Error occured: write file failed")
-              }else{
-                console.log("User leaves Cargo page! Deassert confirm")
-                confirm = '0';
-              }
-            });
-        
+        // User presses 'CONFIRM' and leave Cargo Delivery page
+        if (payload) {
+            // Deassert confirm
+            fs.writeFileSync(this.confirm_file, "0");
+            console.log("User leaves Cargo page! Deassert confirm");
+             
             // Close Lock
-            fs.writeFile("/home/pi/Desktop/MagicMirror/modules/Cargo/lock.txt", "0", function (err) {
-              if(err) {
-                console.log("Error occured: write file failed")
-              }else{
-                console.log("User leaves Cargo page! Close Lock!")
-                //console.log("Confirm: " + confirm);
-              }
-            });
+            fs.writeFileSync(this.lock_file, "0");
+            console.log("User leaves Cargo page! Close Lock!");
+            
       // User presses 'RECEIVED' and leave Retrieval page 
       }else{
             // Close Lock
-              fs.writeFile("/home/pi/Desktop/MagicMirror/modules/Cargo/lock.txt", "0", function (err) {
-                  if(err) {
-                    console.log("Error occured: write file failed")
-                  }else{
-                    console.log("User received cargo! Close Lock!")
-                    // name_finger = 'xxx';
-                    // name_web = "yyy";
-                    //console.log("Confirm: " + confirm);
-                  }
-                });
-            
+            fs.writeFileSync(this.lock_file, "0");
+            console.log("User received cargo! Close Lock!");
+              
             // Erase name on web
-            fs.writeFile("/home/pi/Desktop/MagicMirror/modules/Cargo/name.txt", "xxx", function (err) {
-              if(err) {
-                console.log("Error occured: write file failed")
-              }else{
-                name_web = "xxx";
-                console.log("Erase web name")
-              }
-            });
-        
+            fs.writeFileSync(this.name_file, "xxx");
+            console.log("Erase web name");
+            
             // Erase fingerprint
-            fs.writeFile("/home/pi/Desktop/MagicMirror/modules/Cargo/fingerprint.txt", "yyy", function (err) {
-              if(err) {
-                console.log("Error occured: write file failed")
-              }else{
-                name_finger = 'yyy';
-                console.log("Erase fingerprint name")
-                //console.log("Confirm: " + confirm);
-              }
-            });
-        
-        
+            fs.writeFileSync(this.finger_file, "yyy");
+            console.log("Erase fingerprint name");
       }
     }
     
     
-   
     
   },
 });

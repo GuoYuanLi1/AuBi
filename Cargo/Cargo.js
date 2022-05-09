@@ -145,9 +145,9 @@ Module.register("Cargo", {
   createIFrame: function () {
     iframe = document.createElement("IFRAME");
     iframe.width = "99.5%";
-    iframe.height = "950px"; // 630px for 13 inch
+    iframe.height = "900px"; // 630px for 13 inch
     iframe.scrolling = "no";
-    iframe.src = this.config.url; 
+    //iframe.src = ""; //"http://139.147.203.179:8081/"; //this.config.url; 
     
     return iframe;
   },
@@ -225,7 +225,7 @@ Module.register("Cargo", {
      switch(notification) {
         case "DOM_OBJECTS_CREATED":
           var timer = setInterval(()=>{
-          this.sendSocketNotification("CARGO_START",0);
+          this.sendSocketNotification("CARGO_START");
         }, 200)
         break
       }
@@ -234,12 +234,14 @@ Module.register("Cargo", {
   // Recieve notification from sockets via nodehelper.js
   socketNotificationReceived: function (notification, payload) {
     switch(notification) {
+      
       case "URL_UP":
         mainMenu = document.getElementById("st-main-menu");
         buttonList = mainMenu.firstChild;
         iFrame = buttonList.lastChild;
         iFrame.src = payload;
         break;
+        
       
       
       case "RETURN_NOW":
