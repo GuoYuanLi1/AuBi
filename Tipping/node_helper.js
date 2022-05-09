@@ -11,6 +11,7 @@ module.exports = NodeHelper.create({
   start: function () {
     this.started = false;
     this.config = {};
+    this.tipping_file = "/home/pi/Desktop/MagicMirror/modules/Tipping/tipping.txt";
   },
 
   socketNotificationReceived: function (notification, payload) {
@@ -19,26 +20,23 @@ module.exports = NodeHelper.create({
         this.config = payload;
         this.started = true;
         console.log("Tipping module has started")
-        //this.sendSocketNotification("SHUTIT", payload);
+       
+        var fs = require('fs');
+        
+        // Clear Tipping
+        fs.writeFileSync(this.tipping_file, "0");
+        console.log("Clear tipping");
       }
     }
 
     else if (notification === "READ_WARNING") {
       var fs = require('fs');
-      
+      var tipping = fs.readFileSync(this.tipping_file).toString().replace(/\s+/g, '');
      
-      fs.readFile("/home/pi/Desktop/MagicMirror/modules/Tipping/tipping.txt", function (err, data) {
-          if(err) console.log("Error occured: read file failed");
-
-          tipping = data.toString().replace(/\s+/g, '');
-          //console.log("tipping!");
-      });
-
-      //console.log("outside read data: " + data_read);
       if(tipping === '1') {
-        // console.log("sending percent: " + percent);
+        console.log("Tipping occurs! Please do not lean!");
         this.sendSocketNotification("TIPPING");
-      }else if(tipping === '0') {
+      }else {
         this.sendSocketNotification("NOT_TIPPING");
       }
          
