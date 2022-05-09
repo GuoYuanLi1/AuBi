@@ -6,15 +6,36 @@ var NodeHelper = require("node_helper")
 
 module.exports = NodeHelper.create({
   start: function() {
-    this.countDown = 10000000
+    this.started = false;
+    this.countDown = 10000000;
+    this.facial_file = "/home/pi/Desktop/MagicMirror/modules/Facial/face_name.txt";
   },
   socketNotificationReceived: function(notification, payload) {
     switch(notification) {
-      case "DO_YOUR_JOB":
+      case "FACIAL_CONFIG":
+        
+        if(!this.started) {
+          this.started = true;
+          console.log("Facial Recognition module has started");
+        }
+        
+        var fs = require('fs');
+        // Intialize the face name to Guest
+        fs.writeFileSync(this.facial_file, "Guest");
+        console.log("Close the initially opened lock!");
+        
+        break;
+      
+      
+      
+      
+      
+      
+      case "READ_FACE":
 
-
-      var fs = require('fs');
-      var face_rec_name = '';
+        var fs = require('fs');
+        var face_rec_name = fs.readFileSync(this.facial_file).toString().replace(/\s+/g, '');
+      /*
       fs.readFile("/home/pi/Desktop/MagicMirror/modules/Facial/sample.txt", function(err,data)
             {
                 if(err)
@@ -24,41 +45,14 @@ module.exports = NodeHelper.create({
                     console.log(face_rec_name);
                   }
             });
+            * */
       
-      if(face_rec_name != "Guest") 
-      {
-         this.sendSocketNotification("I_DID", face_rec_name);
-      }else{
-        this.sendSocketNotification("I_NOT", face_rec_name);
-      }
-
-            
-  /*
-      fs.readdir('/home/pi/Desktop/MagicMirror/modules/Facial/public/', (err, datadir) => {
-        if (err) throw err;
-          
-          // Try it where we expect a match
-          const checker = value =>
-          ['-id.png'].some(element => value.includes(element));
-          face_name_id = datadir.filter(checker)[0];
-          
-          
-          face_name_id = face_name_id.split("-")
-          face_name_display = face_name_id[0];
-        
-           if(face_rec_name == face_name_display)
-          {
-            console.log("state: I_DID, name is %s", face_name_display);
-            this.sendSocketNotification("I_DID", face_rec_name)
-          }else
-          {
-            this.sendSocketNotification("I_NOT", face_rec_name)
-          }
-          
-          
-      });
-      * */
-        break
+        if(face_rec_name !== "Guest") {
+          this.sendSocketNotification("I_DID", face_rec_name);
+        }else{
+          this.sendSocketNotification("I_NOT", face_rec_name);
+        }
+          break;
     }
   },
 })

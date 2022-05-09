@@ -107,12 +107,12 @@ while True:
             
 
         print("Person Detected: {}!".format(face_id))
-        f = open("/home/pi/Desktop/MagicMirror/modules/Facial/sample.txt", "w")
+        f = open("/home/pi/Desktop/MagicMirror/modules/Facial/face_name.txt", "w")
         f.write(name)
         f.close()
         #time taken before the user is logged off from the mirror
         time.sleep(15)
         
-    f = open("/home/pi/Desktop/MagicMirror/modules/Facial/sample.txt", "w")
+    f = open("/home/pi/Desktop/MagicMirror/modules/Facial/face_name.txt", "w")
     f.write(face_id)
     f.close()

@@ -12,6 +12,7 @@ defaults: {
 start: function () {
   this.count = 0
   this.user_image = "modules/Facial/public/guest.gif";
+  this.sendSocketNotification("FACIAL_CONFIG", this.config);
 },
 
 getStyles: function () {
@@ -38,7 +39,7 @@ notificationReceived: function(notification, payload, sender) {
   switch(notification) {
     case "DOM_OBJECTS_CREATED":
       var timer = setInterval(()=>{
-        this.sendSocketNotification("DO_YOUR_JOB", this.count)
+        this.sendSocketNotification("READ_FACE", this.count)
         this.count++
       }, 1000)
       break
@@ -54,7 +55,7 @@ socketNotificationReceived: function(notification, payload) {
       this.sendNotification("IDENTIFIED", payload);
     
        var elem = document.getElementById("COUNT")
-       elem.innerHTML = "Welcome back, " + payload
+       elem.innerHTML = "Welcome back, " + payload;
 
       //Creat Image Element Image
     elem.classList.add(this.config.position);
